@@ -162,3 +162,250 @@ begin including generated binary files or other files that you did not
 mean to include. You do want to start including README, so let's start
 tracking the file.
 
+## Tracking New Files
+
+In order to begin tracking a new file, you use the command ```git add```. To begin tracking the README file, you can run this:
+
+```sh
+$ git add README
+```
+
+If you run your status command again, you can see that your README file is now tracked and staged to be committed:
+
+```sh
+$ git status 
+On branch master 
+Your branch is up-to-date with 'origin/master'. 
+Changes to be committed: 
+    (use "git reset HEAD < file >..." to unstage)
+
+        new file: README
+```
+
+You can tell that it’s staged because it’s under the “Changes to be committed” heading. If you commit at this point, the version of the file at the time you ran ```git add``` is what will be in the historical snapshot. You may recall that when you ran ```git init``` earlier, you then ran git add < files >  —   that was to begin tracking files in your directory. The ```git add``` command takes a path name for either a file or a directory; if it’s a directory, the command adds all the files in that directory recursively.
+
+## Staging Modified Files 
+
+Let’s change a file that was already tracked. If you change a previously tracked file called CONTRIBUTING.md and then run your ```git status``` command again, you get something that looks like this:
+
+```sh
+$ git status
+ On branch master 
+ Your branch is up-to-date with 'origin/ master'. 
+ Changes to be committed: 
+ (use "git reset HEAD < file >..." to unstage) 
+ 
+    new file: 
+    
+        README 
+        
+Changes not staged for commit: 
+    (use "git add < file >..." to update what will be committed) 
+    (use "git checkout -- < file >..." to discard changes in working directory)
+
+    modified: CONTRIBUTING.md
+```
+
+The CONTRIBUTING.md file appears under a section named “Changes not staged for commit”  —   which means that a file that is tracked has been modified in the working directory but not yet staged. To stage it, you run the ```git add``` command. ```git add``` is a multipurpose command  —   you use it to begin tracking new files, to stage files, and to do other things like marking merge-conflicted files as resolved. It may be helpful to think of it more as “add precisely this content to the next commit” rather than “add this file to the project”. Let’s run ```git add``` now to stage the CONTRIBUTING.md file, and then run ```git status``` again:
+
+```sh
+$ git add CONTRIBUTING.md 
+$ git status 
+On branch master 
+Your branch is up-to-date with 'origin/ master'. 
+Changes to be committed: 
+    (use "git reset HEAD < file >..." to unstage) 
+        
+        new file: README 
+        modified: CONTRIBUTING.md
+```
+
+Both files are staged and will go into your next commit. At this point, suppose you remember one little change that you want to make in CONTRIBUTING.md before you commit it. You open it again and make that change, and you’re ready to commit. However, let’s run ```git status``` one more time:
+
+```sh
+$ git status 
+On branch master 
+Your branch is up-to-date with 'origin/ master'. 
+Changes to be committed: 
+    (use "git reset HEAD < file >..." to unstage) 
+    
+        new file: README 
+        modified: CONTRIBUTING.md 
+        
+Changes not staged for commit: 
+    (use "git add < file >..." to update what will be committed) 
+    (use "git checkout -- < file >..." to discard changes in working directory) 
+    
+        modified: CONTRIBUTING.md
+```
+
+What the heck? Now CONTRIBUTING.md is listed as both staged and unstaged. How is that possible? It turns out that Git stages a file exactly as it is when you run the git add command. If you commit now, the version of CONTRIBUTING.md as it was when you last ran the git add command is how it will go into the commit, not the version of the file as it looks in your working directory when you run git commit. If you modify a file after you run git add, you have to run git add again to stage the latest version of the file:
+
+```sh
+$ git add CONTRIBUTING.md 
+$ git status 
+On branch master
+Your branch is up-to-date with 'origin/ master'. 
+Changes to be committed: 
+    (use "git reset HEAD < file >..." to unstage)
+    
+        new file: README 
+        modified: CONTRIBUTING.md
+```
+## Committing Your Changes 
+
+Now that your staging area is set up the way you want it, you can commit your changes. Remember that anything that is still unstaged  —   any files you have created or modified that you haven’t run git add on since you edited them  —   won’t go into this commit. They will stay as modified files on your disk. In this case, let’s say that the last time you ran git status, you saw that everything was staged, so you’re ready to commit your changes. The simplest way to commit is to type git commit: 
+
+```sh
+$ git commit 
+```
+
+Doing so launches your editor of choice :
+
+```sh
+# Please enter the commit message for your changes. Lines starting 
+# with '#' will be ignored, and an empty message aborts the commit. 
+# On branch master 
+# Your branch is up-to-date with 'origin/ master'. 
+# 
+# Changes to be committed: 
+#       new file: README 
+#       modified: CONTRIBUTING.md 
+#
+```
+You can see that the default commit message contains the latest output of the ```git status``` command commented out and one empty line on top. You can remove these comments and type your commit message, or you can leave them there to help you remember what you’re committing. When you exit the editor, Git creates your commit with that commit message.
+
+Alternatively, you can type your commit message inline with the commit command by specifying it after a ```-m``` flag, like this:
+
+```sh
+$ git commit -m "artf182: Fix benchmarks for speed"
+[master 463dc4f] Story 182: Fix benchmarks for speed 
+    2 files changed, 2 insertions( +) 
+    create mode 100644 README
+```
+
+Now you’ve created your first commit! You can see that the commit has given you some output about itself: which branch you committed to (master), what SHA-1 checksum the commit has (463dc4f), how many files were changed, and statistics about lines added and removed in the commit. 
+
+Remember that the commit records the snapshot you set up in your staging area. Anything you didn’t stage is still sitting there modified; you can do another commit to add it to your history. Every time you perform a commit, you’re recording a snapshot of your project that you can revert to or compare to later.
+
+## Viewing the Commit History 
+
+After you have created several commits, or if you have cloned a repository with an existing commit history, you’ll probably want to look back to see what has happened. The most basic and powerful tool to do this is the ```git log``` command. 
+
+These examples use a very simple project called “simplegit”. To get the project, run 
+
+```sh
+$ git clone https://github.com/schacon/simplegit-progit 
+```
+
+When you run git log in this project, you should get output that looks something like this: 
+
+```sh
+$ git log 
+commit ca82a6dff817ec66f44342007202690a93763949 
+Author: Scott Chacon < schacon@ gee-mail.com > 
+Date: Mon Mar 17 21: 52: 11 2008 -0700 
+
+    changed the version number 
+    
+commit 085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7 
+Author: Scott Chacon < schacon@ gee-mail.com > 
+Date: Sat Mar 15 16: 40: 33 2008 -0700 
+
+    removed unnecessary test 
+    
+commit a11bef06a3f659402fe7563abf99ad00de2209e6 
+Author: Scott Chacon < schacon@ gee-mail.com > 
+Date: Sat Mar 15 10: 31: 28 2008 -0700
+
+    first commit
+```
+
+By default, with no arguments, ```git log``` lists the commits made in that repository in reverse chronological order  —   that is, the most recent commits show up first. As you can see, this command lists each commit with its SHA-1 checksum, the author’s name and email, the date written, and the commit message. 
+
+## Undoing Things 
+
+At any stage, you may want to undo something. Here, we’ll review a few basic tools for undoing changes that you’ve made. Be careful, because you can’t always undo some of these undos. This is one of the few areas in Git where you may lose some work if you do it wrong. 
+
+One of the common undos takes place when you commit too early and possibly forget to add some files, or you mess up your commit message. If you want to redo that commit, make the additional changes you forgot, stage them, and commit again using the ```--amend``` option: 
+
+```sh
+$ git commit --amend 
+```
+
+This command takes your staging area and uses it for the commit. If you’ve made no changes since your last commit (for instance, you run this command immediately after your previous commit), then your snapshot will look exactly the same, and all you’ll change is your commit message. 
+
+The same commit-message editor fires up, but it already contains the message of your previous commit. You can edit the message the same as always, but it overwrites your previous commit. 
+
+As an example, if you commit and then realize you forgot to stage the changes in a file you wanted to add to this commit, you can do something like this: 
+
+```sh
+$ git commit -m 'initial commit' 
+$ git add forgotten_file 
+$ git commit --amend 
+```
+
+You end up with a single commit —  the second commit replaces the results of the first.
+
+## Unstaging a Staged File 
+
+The next two sections demonstrate how to work with your staging area and working directory changes. The nice part is that the command you use to determine the state of those two areas also reminds you how to undo changes to them. For example, let’s say you’ve changed two files and want to commit them as two separate changes, but you accidentally type ``git add *`` and stage them both. How can you unstage one of the two? The git status command reminds you: 
+
+```sh
+$ git add * 
+$ git status 
+On branch master 
+Changes to be committed: 
+        (use "git reset HEAD < file >..." to unstage) 
+        
+            renamed: README.md -> README
+            modified: CONTRIBUTING.md 
+```
+
+Right below the “Changes to be committed” text, it says use ```git reset HEAD < file >... ```to unstage. So, let’s use that advice to unstage the CONTRIBUTING.md file: 
+
+```sh
+$ git reset HEAD CONTRIBUTING.md 
+Unstaged changes after reset: 
+M CONTRIBUTING.md 
+$ git status On branch master 
+Changes to be committed: 
+    (use "git reset HEAD < file >..." to unstage)
+    
+        renamed: README.md -> README 
+        
+Changes not staged for commit: 
+    (use "git add < file >..." to update what will be committed) 
+    (use "git checkout -- < file >..." to discard changes in working directory) 
+    
+        modified: CONTRIBUTING.md
+```
+
+The command is a bit strange, but it works. The CONTRIBUTING.md file is modified but once again unstaged.
+
+## Unmodifying a Modified File 
+
+What if you realize that you don’t want to keep your changes to the CONTRIBUTING.md file? How can you easily unmodify it  —   revert it back to what it looked like when you last committed (or initially cloned, or however you got it into your working directory)? Luckily, git status tells you how to do that, too. In the last example output, the unstaged area looks like this: 
+
+```sh
+Changes not staged for commit: 
+    (use "git add < file >..." to update what will be committed) 
+    (use "git checkout -- < file >..." to discard changes in working directory) 
+    
+        modified: CONTRIBUTING.md 
+```
+
+It tells you pretty explicitly how to discard the changes you’ve made. Let’s do what it says: 
+
+```sh
+$ git checkout -- CONTRIBUTING.md 
+$ git status 
+On branch master 
+Changes to be committed: 
+    (use "git reset HEAD < file >..." to unstage) 
+    
+        renamed: README.md -> README 
+```
+
+You can see that the changes have been reverted.
+
